@@ -1,10 +1,13 @@
 package main
 
+// https://blog.logrocket.com/creating-a-web-server-with-golang/
+
 import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -25,12 +28,55 @@ func helpHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w,"\nServer Port %s, Gateway %s\n", PORT, GATE)
 
-	fmt.Fprintf(w,"jwt token is valid  : {\"code\":200}\n")
-	fmt.Fprintf(w,"jwt token is invalid: {\"code\":401}\n")
+	fmt.Fprintf(w,"\njwt token is valid  : {\"code\":200}\n")
+	fmt.Fprintf(w,"jwt token is invalid: {\"code\":401}\n\n")
 
-	exa := "curl 'http://"+GATE+":1812/validate' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkZXZvcDAxQHBlZ2FzdXMwMUB1c2VyIiwiYXV0aCI6IlJPTEVfVEVOQU5UIiwiZXhwIjoxNjMwOTEzOTc5fQ.7XXsWUis1zh1EmLN6XPIOiglp6o_7k0aU8FR1DYQvz6fFg-s5eprUAco6aEScwNavye3u9r3VRSrnI_okEaxpQ'"
+	host := "CONN"
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		fmt.Printf("cannot find IP\n")
+	}
+	for _, address := range addrs {
+		// check the address type and if it is not a loopback the display it
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				host = ipnet.IP.String()
+			}
+		}
+	}
+
+	exa := "curl 'http://" + host +":1812/validate' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkZXZvcDAxQHBlZ2FzdXMwMUB1c2VyIiwiYXV0aCI6IlJPTEVfVEVOQU5UIiwiZXhwIjoxNjMwOTEzOTc5fQ.7XXsWUis1zh1EmLN6XPIOiglp6o_7k0aU8FR1DYQvz6fFg-s5eprUAco6aEScwNavye3u9r3VRSrnI_okEaxpQ'"
 	fmt.Fprintf(w,"put jwt in reqest header to validate - Authorization \n\n")
 	fmt.Fprintf(w,"%s\n", exa)
+}
+
+func sendJWTreq(jwt string) string {
+	req_url := "https://" + GATE + "/api/tenant/v1/users/current"
+
+	req, err := http.NewRequest("GET", req_url, nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if ! strings.Contains(jwt, "Bearer ") {
+		jwt = "Bearer " + jwt
+	}
+	req.Header.Set("Authorization", jwt)
+
+	tr := &http.Transport{ TLSClientConfig: &tls.Config{InsecureSkipVerify: true},	}
+	client := &http.Client{Transport: tr}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Printf("%s\n%s\n%s\n", req_url, jwt, req.Header)
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return string(body)
 }
 
 func jwtValidateHandler(w http.ResponseWriter, r *http.Request) {
@@ -45,31 +91,24 @@ func jwtValidateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req_url := "https://" + GATE + "/api/tenant/v1/users/current"
+	resp_body := sendJWTreq(jwt)
 
-	req, err := http.NewRequest("GET", req_url, nil)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	req.Header.Set("Authorization", jwt)
-
-	tr := &http.Transport{ TLSClientConfig: &tls.Config{InsecureSkipVerify: true},	}
-	client := &http.Client{Transport: tr}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	if strings.Contains(string(body), "username") {
+	if strings.Contains(resp_body, "username") {
 		fmt.Fprintf(w,"{\"status\":200}")
 	} else {
 		fmt.Fprintf(w,"{\"status\":401}")
 	}
+}
+
+func formHandler(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		fmt.Fprintf(w, "ParseForm() err: %v", err)
+		return
+	}
+	jwt := r.FormValue("jwt")
+
+	resp_body := sendJWTreq(jwt)
+	fmt.Fprintf(w, "%s\n", resp_body)
 }
 
 func main() {
@@ -81,6 +120,10 @@ func main() {
 		PORT = os.Args[2]
 	}
 
+	fileServer := http.FileServer(http.Dir("./static"))
+
+	http.Handle("/", fileServer)
+	http.HandleFunc("/test", formHandler)
 	http.HandleFunc("/help", helpHandler)
 	http.HandleFunc("/validate", jwtValidateHandler)
 
