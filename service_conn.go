@@ -77,6 +77,7 @@ func main() {
 		GATE = os.Args[1]
 	}
 	if len(os.Args) == 3  {
+		GATE = os.Args[1]
 		PORT = os.Args[2]
 	}
 
