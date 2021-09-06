@@ -29,7 +29,7 @@ jwt token is invalid
 
 ### Service
     
-    service_conn GATEWAY_URL PORT
+    service_conn GATEWAY_DOMAIN PORT
 
     service_conn user.ztna85.lt.net 1812
     
