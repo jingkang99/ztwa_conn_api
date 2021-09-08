@@ -56,3 +56,10 @@ jwt token is invalid
     100    14  100    14    0     0    366      0 --:--:-- --:--:-- --:--:--   378{"status":200}
     * Connection #0 to host 192.168.22.105 left intact
     }
+
+
+# Build
+
+    env GOOS=linux GOARCH=amd64 go build
+
+
