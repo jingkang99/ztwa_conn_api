@@ -1,7 +1,7 @@
 package main
 
 // JK 090721
-// SERVICE 1812 user.anfuying.com 3 root Dev00p123 22
+// SERVICE 1812 user.anfu.com 3 root Dev--p123 22
 
 import (
 	"crypto/tls"
