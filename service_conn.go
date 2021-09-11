@@ -2,6 +2,7 @@ package main
 
 // JK 090721
 // SERVICE 1812 user.anfu.com 3 root Dev--p123 22
+// ServeMux used
 
 import (
 	"crypto/tls"
@@ -248,6 +249,12 @@ func dataServices(w http.ResponseWriter, r *http.Request) {
 	rows.Close()
 }
 
+func perfTestBench(w http.ResponseWriter, r *http.Request) {
+	// best performance
+	fmt.Printf("_")
+	fmt.Fprintf(w, "ok")
+}
+
 func main() {
 	if len(os.Args) > 1 {
 		GATE = os.Args[1]
@@ -270,16 +277,18 @@ func main() {
 
 	fileServer := http.FileServer(http.Dir("./static"))
 
-	http.Handle("/", fileServer)
-	http.HandleFunc("/test", formHandler)
-	http.HandleFunc("/help", helpHandler)
-	http.HandleFunc("/validate", jwtValidateHandler)
-	http.HandleFunc("/services", dataServices)
-	http.HandleFunc("/remotecs", sshConnection)
+	mux := http.NewServeMux()
+	mux.Handle("/", fileServer)
+	mux.HandleFunc("/test", formHandler)
+	mux.HandleFunc("/help", helpHandler)
+	mux.HandleFunc("/perf", perfTestBench)
+	mux.HandleFunc("/validate", jwtValidateHandler)
+	mux.HandleFunc("/services", dataServices)
+	mux.HandleFunc("/remotecs", sshConnection)
 
 	fmt.Printf("Server Port %s, Gateway %s\n", PORT, GATE)
 
-	if err := http.ListenAndServe(":"+PORT, nil); err != nil {
+	if err := http.ListenAndServe(":"+PORT, mux); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -287,3 +296,4 @@ func main() {
 // https://tutorialedge.net/golang/golang-mysql-tutorial/
 // https://blog.logrocket.com/creating-a-web-server-with-golang/
 // https://gist.github.com/vinzenz/d8e6834d9e25bbd422c14326f357cce0
+// https://www.honeybadger.io/blog/go-web-services/
