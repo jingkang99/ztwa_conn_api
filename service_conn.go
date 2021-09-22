@@ -1,10 +1,10 @@
 package main
 
 // JK 090721
-// SERVICE 1812 user.anfu.com 3 root Dev--p123 22
-// ServeMux used
+// SERVICE user.anfuyin--- 1812 1 root D---123 22
 
 import (
+	"context"
 	"crypto/tls"
 	"database/sql"
 	"fmt"
@@ -14,10 +14,14 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
+
+	"github.com/schollz/websocket"
+	"github.com/schollz/websocket/wsjson"
 )
 
 var GATE = "bad.lt.net"
@@ -113,7 +117,7 @@ func sshConnection(w http.ResponseWriter, r *http.Request) {
 		err = rows.Scan(&user.id, &user.username, &user.full_name, &user.email, &user.phone, &user.login_date, &user.login_jwt)
 		if err != nil {
 			fmt.Printf("data row err: %v", err)
-			return
+			//login_jwt null cause exception, continue
 		}
 		fmt.Fprintf(w, "%d,%s,%s,%s,%s,%s,%s\n", user.id, user.username, user.full_name, user.email, user.phone, user.login_date, user.login_jwt)
 	}
@@ -249,10 +253,64 @@ func dataServices(w http.ResponseWriter, r *http.Request) {
 	rows.Close()
 }
 
+func connWebsocket(w http.ResponseWriter, r *http.Request) {
+
+	t := time.Now().UTC()
+	log.Printf("%v %v %v %s\n", r.RemoteAddr, r.Method, r.URL.Path, time.Since(t))
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+	c, err := websocket.Accept(w, r, nil)
+	if err != nil {
+		return
+	}
+	defer c.Close(websocket.StatusInternalError, "internal error")
+
+	ctx, cancel := context.WithTimeout(r.Context(), time.Hour*120000)
+	defer cancel()
+
+	for {
+		var v interface{}
+		err = wsjson.Read(ctx, c, &v)
+		if err != nil {
+			break
+		}
+		log.Printf("received: %v", v)
+		err = wsjson.Write(ctx, c, struct{ Message string }{
+			"hello, browser",
+		})
+		if err != nil {
+			break
+		}
+	}
+	if websocket.CloseStatus(err) == websocket.StatusGoingAway {
+		err = nil
+	}
+	c.Close(websocket.StatusNormalClosure, "")
+	return
+}
+
 func perfTestBench(w http.ResponseWriter, r *http.Request) {
 	// best performance
 	fmt.Printf("_")
 	fmt.Fprintf(w, "ok")
+}
+
+func sche_task(t time.Time ) {
+	fmt.Println("task ", t)
+}
+
+func scheduleT(ticker *time.Ticker, done chan bool  ) {
+	for {
+		select {
+		case <-done:
+			return
+		case t := <-ticker.C:
+			sche_task(t)
+		}
+	}
 }
 
 func main() {
@@ -285,6 +343,7 @@ func main() {
 	mux.HandleFunc("/validate", jwtValidateHandler)
 	mux.HandleFunc("/services", dataServices)
 	mux.HandleFunc("/remotecs", sshConnection)
+	mux.HandleFunc("/webscket", connWebsocket)
 
 	fmt.Printf("Server Port %s, Gateway %s\n", PORT, GATE)
 
@@ -297,3 +356,7 @@ func main() {
 // https://blog.logrocket.com/creating-a-web-server-with-golang/
 // https://gist.github.com/vinzenz/d8e6834d9e25bbd422c14326f357cce0
 // https://www.honeybadger.io/blog/go-web-services/
+// https://schollz.com/blog/websockets-with-golang/
+
+// "github.com/carlescere/scheduler"
+// "github.com/go-co-op/gocron"
