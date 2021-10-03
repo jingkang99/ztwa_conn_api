@@ -482,10 +482,13 @@ func main() {
 	}
 	//scheduleT(ticker, done)  */
 
-	fileServer := http.FileServer(http.Dir("./static"))
+	fileWebRoot := http.FileServer(http.Dir("./static"))
+	fileUploads := http.FileServer(http.Dir("./temp"))
 
 	mux := http.NewServeMux()
-	mux.Handle("/", fileServer)
+	mux.Handle("/", fileWebRoot)
+	mux.Handle("/files/",  http.StripPrefix("/files", fileUploads))
+
 	mux.HandleFunc("/test", formHandler)
 	mux.HandleFunc("/help", helpHandler)
 	mux.HandleFunc("/perf", perfTestBench)
@@ -513,3 +516,4 @@ func main() {
 // "github.com/go-co-op/gocron"
 
 // https://gabrieltanner.org/blog/golang-file-uploading
+// https://www.alexedwards.net/blog/serving-static-sites-with-go
