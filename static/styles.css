@@ -1,4 +1,4 @@
-<link href='http://fonts.googleapis.com/css?family=Bitter' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=roboto' rel='stylesheet' type='text/css'>
 
 <style type="text/css">
 .form-style-10{
@@ -28,7 +28,7 @@
 	-moz-border-radius: 10px 10px 0 0;
 	color: #fff;
 	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.12);
-	font: normal 30px 'Bitter', serif;
+	font: normal 30px 'roboto', serif;
 	-moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
 	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
 	box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
@@ -41,7 +41,7 @@
 }
 .form-style-10 label{
 	display: block;
-	font: 13px Arial, Helvetica, sans-serif;
+	font: 13px roboto, Helvetica, sans-serif;
 	color: #888;
 	margin-bottom: 15px;
 }
@@ -72,8 +72,8 @@
 }
 
 .form-style-10 .section{
-	font: normal 20px 'Bitter', serif;
-	color: #2A88AD;
+	font: normal 20px "roboto", serif;
+	color: #fff;
 	margin-bottom: 5px;
 }
 .form-style-10 .section span {
@@ -98,7 +98,7 @@
 	-moz-border-radius: 5px;
 	color: #fff;
 	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.12);
-	font: normal 30px 'Bitter', serif;
+	font: normal 30px "roboto", serif;
 	-moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
 	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
 	box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
@@ -115,7 +115,7 @@
 .form-style-10 .privacy-policy{
 	float: right;
 	width: 250px;
-	font: 12px Arial, Helvetica, sans-serif;
+	font: 12px roboto, Helvetica, sans-serif;
 	color: #4D4D4D;
 	margin-top: 10px;
 	text-align: right;

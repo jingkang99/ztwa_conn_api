@@ -1,27 +1,39 @@
 <html lang="en">
     <head>
+    <meta charset="utf-8">
     <title>ZTWA Service</title>
     <link rel="stylesheet" href="styles.css">
+    <style> 
+        body {
+          background-image: url(body.webp);
+          background-repeat: no-repeat;
+          background-color: #cccccc;
+          padding-left: 10em;
+          padding-right: 10em;
+          padding-top: 5em;
+        }
+    </style>
     </head>
     <body>
     
     <div class="form-style-10">
         <h1>Zero Trust Web Access Connector<span>Services</span></h1>
-
+        
+        <div class="section"><span>1</span></div>
         <a href="/help" title="API"><div class="section">Help</div></a>
-        <div class="inner-wrap">      
-            <label>jwt token is valid  : {"code":200} </label>
-            <label>jwt token is invalid: {"code":401}</label>
-        </div>
-
+        <label>jwt token is valid ? {"code":200} : {"code":401}</label>
+        
+        <div class="section"><span>2</span></div>
         <a href="/form.html" title="API"><div class="section">JWT Test</div></a>
-        <div class="inner-wrap"></div>
+        <label>Validate a JWT</label>
 
+        <div class="section"><span>3</span></div>
         <a href="/upload.html" title="API"><div class="section">File Upload</div></a>
-        <div class="inner-wrap"></div>
+        <label>Upload a File</label>
 
+        <div class="section"><span>4</span></div>
         <a href="/files" title="API"><div class="section">File List</div></a>
-        <div class="inner-wrap"></div>
+        <label>Show Files to Download</label>
 
     </div>
 

@@ -4,22 +4,34 @@
     <title>Upload Test</title>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="styles.css">
-<body>
-<div>
+        <style> 
+        body {
+          background-image: url(body.webp);
+          background-repeat: no-repeat;
+          background-color: #cccccc;
+          padding-left: 10em;
+          padding-right: 10em;
+          padding-top: 5em;
+        }
+    </style>
+</head>
+    <body>
+    <div>
 
-    <div class="form-style-10">
-        <h1>File Upload Test<span>Testing Various File Types</span></h1>
-        <form method="POST" action="/myupload" enctype="multipart/form-data">
-            <div class="section"><span>1</span>Input</div>
-            <div class="inner-wrap">
-                <label>token <input type="file" name="myFile" /></label>
-            </div>
-            <div class="button-section">
-            <input type="submit" value="Upload" />
-            </div>
-        </form>
+        <div class="form-style-10">
+            <h1>File Upload Test<span>Testing Various File Types</span></h1>
+            <form method="POST" action="/myupload" enctype="multipart/form-data">
+                <div class="section"><span>1</span>Input</div>
+                <div class="inner-wrap">
+                    <label>token <input type="file" name="myFile" /></label>
+                </div>
+                <div class="button-section">
+                <input type="submit" value="Upload" />
+                <input type="button" value="Back" onclick="history.back()">
+                </div>
+            </form>
+        </div>
+
     </div>
-
-</div>
-</body>
+    </body>
 </html>
