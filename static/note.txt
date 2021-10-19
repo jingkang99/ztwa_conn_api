@@ -1,0 +1,15 @@
+auth_basic
+	auth_basic "Admin Only"; 
+	auth_basic_user_file /usr/local/openresty/nginx/conf/htpasswd;
+	
+	echo -n 'foo:’ >> htpasswd 
+	openssl passwd >> htpasswd
+	Or
+	htpasswd -c /usr/local/openresty/nginx/conf/htpasswd  foo
+	
+	To verify user and password
+	htpasswd -vb htpasswd foo D
+	
+	https://macminiosx.github.io/passwd-generator/
+    https://github.com/tstibbs/javascript-password-generator
+    https://www.yanxurui.cc/posts/ai/2018-12-06-Overview-of-NLP/
