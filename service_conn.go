@@ -376,7 +376,6 @@ func oneTimePassword(key []byte, value []byte) uint32 {
 func display(w http.ResponseWriter, page string, data interface{}) {
 	templates.ExecuteTemplate(w, page+".html", data)
 }
-
 func uploadFileHdl(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":

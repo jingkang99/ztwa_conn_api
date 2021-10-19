@@ -1,6 +1,7 @@
 <link href='http://fonts.googleapis.com/css?family=roboto' rel='stylesheet' type='text/css'>
 
 <style type="text/css">
+
 .form-style-10{
 	width:450px;
 	padding:30px;
@@ -42,7 +43,7 @@
 .form-style-10 label{
 	display: block;
 	font: 13px roboto, Helvetica, sans-serif;
-	color: #888;
+	color: #CDD8E4;
 	margin-bottom: 15px;
 }
 .form-style-10 input[type="text"],
@@ -52,6 +53,7 @@
 .form-style-10 input[type="number"],
 .form-style-10 input[type="search"],
 .form-style-10 input[type="time"],
+.form-style-10 input[type="url"],
 .form-style-10 input[type="url"],
 .form-style-10 input[type="password"],
 .form-style-10 textarea,
@@ -119,5 +121,87 @@
 	color: #4D4D4D;
 	margin-top: 10px;
 	text-align: right;
+}
+
+$pri: #128CFC;
+$sec: #fffffe;
+$dark-pri: #0B5AA2;
+* {
+  box-sizing: border-radius;
+  font-family: 'Rubik', sans-serif;
+}
+.container {
+  border: 1px solid black;
+  
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  margin: auto;
+  
+  display: grid;
+  place-items: center;
+  background-color: $pri;
+}
+
+.items {
+  width: 300px;
+  background: $sec;
+  box-shadow: 0 3px 6px rgba(black,0.16), 0 3px 6px rgba(black,0.23);
+  border-top: 10px solid $dark-pri;
+}
+
+.items-head p{
+  padding: 5px 20px;
+  margin: 10px;
+  color: #0B5AA2;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.items-head hr {
+  width: 20%;
+  margin: 0px 30px;
+  border: 1px solid $dark-pri;
+}
+
+.items-body {
+  display: grid;
+  grid-gap: 5px;
+  font-size: 14px;
+  color: #CDD8E4;
+}
+
+.items-body-content {
+  padding: 5px;
+  padding-right: 0px;
+  display: grid;
+  grid-template-columns: 10fr 1fr;
+  // background-color: lightblue;
+  font-size: 13px;
+  grid-gap: 0px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  color: #CDD8E4;
+}
+
+.items-body-content:hover {
+  border-radius: 15px;
+  border: 1px solid $dark-pri;
+}
+
+.items-body-content i {
+  align-self: center;
+  font-size: 15px;
+  color: $dark-pri;
+  font-weight: bold;
+  animation: icon 1.5s infinite forwards;
+}
+
+@keyframes icon {
+  0%,100%{
+    transform: translate(0px);
+  }
+  50% {
+    transform: translate(3px);
+  }
 }
 </style>
