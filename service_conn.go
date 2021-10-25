@@ -2,9 +2,9 @@ package main
 
 // JK 090721
 // SERVICE user.anfuyin--- 1812 1 root D---123 22
+// curl -v -X POST http://localhost:1812/basicusr -u pegasus:Dev00p1
 
 import (
-	"context"
 	"crypto/hmac"
 	"crypto/sha1"
 	"crypto/tls"
@@ -25,8 +25,7 @@ import (
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/schollz/websocket"
-	"github.com/schollz/websocket/wsjson"
+	auth "github.com/abbot/go-http-auth"
 )
 
 var GATE = "bad.lt.net"
@@ -51,6 +50,10 @@ type User struct {
 	login_jwt	string
 }
 
+var (
+	username = "pegasus"
+	password = "Dev00p1"
+)
 type ViaSSHDialer struct {
 	client *ssh.Client
 }
@@ -262,7 +265,6 @@ func dataServices(w http.ResponseWriter, r *http.Request) {
 }
 
 func connWebsocket(w http.ResponseWriter, r *http.Request) {
-
 	t := time.Now().UTC()
 	log.Printf("%v %v %v %s\n", r.RemoteAddr, r.Method, r.URL.Path, time.Since(t))
 
@@ -270,34 +272,7 @@ func connWebsocket(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 
-	c, err := websocket.Accept(w, r, nil)
-	if err != nil {
-		return
-	}
-	defer c.Close(websocket.StatusInternalError, "internal error")
 
-	ctx, cancel := context.WithTimeout(r.Context(), time.Hour*120000)
-	defer cancel()
-
-	for {
-		var v interface{}
-		err = wsjson.Read(ctx, c, &v)
-		if err != nil {
-			break
-		}
-		log.Printf("received: %v", v)
-		err = wsjson.Write(ctx, c, struct{ Message string }{
-			"hello, browser",
-		})
-		if err != nil {
-			break
-		}
-	}
-	if websocket.CloseStatus(err) == websocket.StatusGoingAway {
-		err = nil
-	}
-	c.Close(websocket.StatusNormalClosure, "")
-	return
 }
 
 func perfTestBench(w http.ResponseWriter, r *http.Request) {
@@ -376,6 +351,7 @@ func oneTimePassword(key []byte, value []byte) uint32 {
 func display(w http.ResponseWriter, page string, data interface{}) {
 	templates.ExecuteTemplate(w, page+".html", data)
 }
+
 func uploadFileHdl(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
@@ -417,6 +393,40 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, "Successfully Uploaded File\n")
+}
+
+func basicUserAuth(w http.ResponseWriter, r *http.Request) {
+	u, p, ok := r.BasicAuth()
+	if !ok {
+		fmt.Println("Error parsing basic auth")
+		w.WriteHeader(401)
+		return
+	}
+	if u != username {
+		fmt.Printf("Username provided is correct: %s\n", u)
+		w.WriteHeader(401)
+		return
+	}
+	if p != password {
+		fmt.Printf("Password provided is correct: %s\n", u)
+		w.WriteHeader(401)
+		return
+	}
+	fmt.Printf("Username: %s\n", u)
+	fmt.Printf("Password: %s\n", p)
+	w.WriteHeader(200)
+	return
+}
+
+func basicauth_secret(user, realm string) string {
+	if user == "john" {
+		// password is "hello"
+		return "$1$dlPL2MqE$oQmn16q49SqdmhenQuNgs1"
+	}
+	return ""
+}
+func basicauth_handle(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
+	fmt.Fprintf(w, "<html><body><h1>Hello, %s!</h1></body></html>", r.Username)
 }
 
 // all []byte in this program are treated as Big Endian
@@ -497,6 +507,10 @@ func main() {
 	mux.HandleFunc("/webscket", connWebsocket)
 	mux.HandleFunc("/otpasswd", oneTimePwdGen)
 	mux.HandleFunc("/myupload", uploadFileHdl)
+	mux.HandleFunc("/basicusr", basicUserAuth)
+
+	authenticator := auth.NewBasicAuthenticator("example.net", basicauth_secret)
+	mux.HandleFunc("/basicaut", authenticator.Wrap(basicauth_handle))
 
 	fmt.Printf("Server Port %s, Gateway %s\n", PORT, GATE)
 
@@ -516,3 +530,8 @@ func main() {
 
 // https://gabrieltanner.org/blog/golang-file-uploading
 // https://www.alexedwards.net/blog/serving-static-sites-with-go
+
+//https://golangbyexample.com/http-basic-auth-golang/
+//https://www.alexedwards.net/blog/basic-authentication-in-go
+
+//https://yalantis.com/blog/how-to-build-websockets-in-go/

@@ -13,7 +13,7 @@
 	<script type="text/javascript" src="./sha1.js"></script>
 	<script type="text/javascript" src="./javacrypt.js"></script>
     
-    <script type="text/javascript"> 
+    <script type="text/javascript">
 		//<![CDATA[
 		<!--
 		 
@@ -23,7 +23,6 @@
 		var ALG_APSHA = 3;           
 		var AP_SHA1PW_ID = "{SHA}";
 		var AP_MD5PW_ID  = "$apr1$";
-		 
 
 		var itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";  /* 0 ... 63 => ASCII - 64 */
 		function ap_to64(v, n) {
@@ -43,12 +42,9 @@
 		}
 		 
 		function htpasswd(user, pw, alg) {
+		  var salt = ap_to64(Math.floor(Math.random()*16777215), 4)
+				   + ap_to64(Math.floor(Math.random()*16777215), 4);
 
-
-		  var salt = ap_to64(Math.floor(Math.random()*16777215), 4)    
-				   + ap_to64(Math.floor(Math.random()*16777215), 4);   
-		 
-		 
 		  var plus127 = 0;
 		  for (var i=0; i<user.length; i++) if (user.charCodeAt(i) > 127) plus127++;
 		  if (plus127) alert("Apache doesn't like non-ascii characters in the user name.");
@@ -66,7 +62,6 @@
 
 			  var final_ = str_md5(pw + salt + pw);
 			  for (var pl = pw.length; pl > 0; pl -= 16) msg += final_.substr(0, (pl > 16) ? 16 : pl);
-		 
 
 			  for (i = pw.length; i != 0; i >>= 1)
 				if (i & 1) msg += String.fromCharCode(0);
@@ -83,7 +78,6 @@
 				final_ = str_md5(msg2);
 			  }
 			  final_ = stringToArray(final_);
-		 
 
 			  cpw = AP_MD5PW_ID + salt + '$';
 			  cpw += ap_to64((final_[ 0]<<16) | (final_[ 6]<<8) | final_[12], 4);
@@ -103,7 +97,6 @@
 			  cpw = Javacrypt.displayPassword(pw, salt);
 			  break;
 		  }
-		 
 
 		  if (user.length + 1 + cpw.length > 255) alert('Your login and password are too long.');
 		  else return user + ':' + cpw;
@@ -186,8 +179,19 @@
             var $display = document.getElementById('display-password');
             $display.textContent = password;
         }
+
+        function stringCodeOps() {
+            var strin1 = document.getElementById("strencode").value;
+            var encode = document.getElementById("strdecode").value;
+
+            if (strin1.length > 0) 
+                document.getElementById("strdecode").value = btoa(strin1);
+            else 
+                document.getElementById("strencode").value = atob(encode);
+        }
+
     </script>
-        
+
     <style>
         body {
           background-image: url(body.webp);
@@ -256,78 +260,101 @@
     </div>
     </div>
     </div>
-    
-   
-       
+
+
+
     <div class="section"><span class="icono-gear"></span>
     <div class="wrap-collabsible">
     <input  id="passwdgen" class="toggle" type="checkbox">
     <label for="passwdgen" class="lbl-toggle">htpasswd Generator</label>
     <div class="collapsible-content">
     <div class="content-inner">
-         <div class="items-body">
+    <div class="items-body">
          This htpasswd password encryption applet is written in JavaScript, so the entire process runs within your browser. Nothing is transmitted to any server, we take your privacy and security serious.
 		<form>
 		<p>user name : <input name="user" type="text" size="30" />
 		<p>password :  <input name="pwd1" type="text" size="25" />
 		<p>algorithm : <select name="alg"> 
-		<option>none (Windows &amp; TPF servers)</option> 
-		<option>Crypt (all Unix servers)</option> 
-		<option selected="selected">MD5 (Apache servers only)</option> 
-		<option>SHA-1 (Netscape-LDIF / Apache servers)</option> 
+            <option>none (Windows &amp; TPF servers)</option>
+            <option>Crypt (all Unix servers)</option>
+            <option selected="selected">MD5 (Apache servers only)</option>
+            <option>SHA-1 (Netscape-LDIF / Apache servers)</option>
 		</select></p>
-		<p><input type="button" value="encrypt password" onclick="this.form.pwd2.value=htpasswd(this.form.user.value, this.form.pwd1.value, this.form.alg.selectedIndex)" /> </p>
+		<p><input type="button" value="encrypt password"
+                  onclick="this.form.pwd2.value=htpasswd(this.form.user.value, this.form.pwd1.value, this.form.alg.selectedIndex)" /> </p>
 		<p>copy and paste this line into your .htpasswd file<br />
 		<input name="pwd2" type="text" size="60" /> </p>
-		</form></div>
+		</form>
     </div>
     </div>
     </div>
     </div>
-    
-    
-    
+    </div>
+
+
+
     <div class="section"><span class="icono-gear"></span>
     <div class="wrap-collabsible">
     <input  id="passwdrandom" class="toggle" type="checkbox">
     <label for="passwdrandom" class="lbl-toggle">Random Password Generator</label>
     <div class="collapsible-content">
     <div class="content-inner">
-        <div class="items-body">
+    <div class="items-body">
         Simple Javascript Password Generator
+        <form>
+            <div id="upper">
+                <input type="checkbox" checked><input type="text">
+                <a href="#">reset</a>
+            </div>
+            <div id="lower">
+                <input type="checkbox" checked><input type="text">
+                <a href="#">reset</a>
+            </div>
+            <div id="number">
+                <input type="checkbox" checked><input type="text">
+                <a href="#">reset</a>
+            </div>
+            <div id="special">
+                <input type="checkbox" checked><input type="text">
+                <a href="#">reset</a>
+            </div>
+            Length: <input id="length" type="text" value="12"><br />
+            <input type="submit" value="Generate" onclick="generatePassword(); return false;">
+            <br/>               
+            <div class="items-body" id="display-password"></div>
+        </form>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+
+
+
+    <div class="section"><span class="icono-gear"></span>
+    <div class="wrap-collabsible">
+    <input  id="base64de" class="toggle" type="checkbox">
+    <label for="base64de" class="lbl-toggle">Base64 Encode & Decode </label>
+    <div class="collapsible-content">
+    <div class="content-inner">
+    <div class="items-body">
 			<form>
-				<div id="upper">
-					<input type="checkbox" checked><input type="text">
-                    <a href="#">reset</a>
-				</div>
-				<div id="lower">
-					<input type="checkbox" checked><input type="text">
-                    <a href="#">reset</a>
-				</div>
-				<div id="number">
-					<input type="checkbox" checked><input type="text">
-                    <a href="#">reset</a>
-				</div>
-				<div id="special">
-					<input type="checkbox" checked><input type="text">
-                    <a href="#">reset</a>
-				</div>
-				Length: <input id="length" type="text" value="12"><br />
-				<input type="submit" value="Generate" onclick="generatePassword(); return false;">
-                <br/>               
-                <div class="items-body" id="display-password"></div>
+                Encode <a href="#" onclick="document.getElementById('strencode').value=''">&nbsp;&nbsp;clear</a>
+                <input id="strencode" type="text" value="Hello World"><br />
+
+                Decode <a href="#" onclick="document.getElementById('strdecode').value=''">&nbsp;&nbsp;clear</a>
+                <input id="strdecode" type="text" value=""><br />
+
+				<input type="submit" value="Convert" onclick="stringCodeOps(); return false;" /><br/></p>
 			</form>
     </div>
     </div>
     </div>
     </div>
     </div>
-    
-    
-    
+
     <input type="button" value="Back" onclick="history.back()">
 
     </div>
     </body>
 </html>
-
