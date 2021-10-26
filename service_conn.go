@@ -26,6 +26,7 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 
 	auth "github.com/abbot/go-http-auth"
+	"github.com/gorilla/websocket"
 )
 
 var GATE = "bad.lt.net"
@@ -111,7 +112,7 @@ func sshConnection(w http.ResponseWriter, r *http.Request) {
 	// And now we can use our new driver with the regular mysql connection string tunneled through the SSH connection
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@mysql+tcp(%s)/%s", dbUser, dbPass, dbHost, dbName))
 	if err != nil {
-		fmt.Fprintf(w, "db ssh conn err: %v", err)
+		fmt.Fprintf(w, "db sql open err: %v", err)
 		return
 	}
 	fmt.Printf("connected to the db %s@%s\n", dbHost, dbName)
@@ -264,16 +265,47 @@ func dataServices(w http.ResponseWriter, r *http.Request) {
 	rows.Close()
 }
 
-func connWebsocket(w http.ResponseWriter, r *http.Request) {
-	t := time.Now().UTC()
-	log.Printf("%v %v %v %s\n", r.RemoteAddr, r.Method, r.URL.Path, time.Since(t))
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-
-
+///
+// We'll need to define an Upgrader
+// this will require a Read and Write buffer size
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin:     func(r *http.Request) bool { return true },
 }
+
+func connWebsocket(w http.ResponseWriter, r *http.Request) {
+	// upgrade this connection to a WebSocket
+	// connection
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Println("Client Connected")
+	err = ws.WriteMessage(1, []byte("Hi from WS"))
+	time.Sleep(1 * time.Second)
+
+	if err != nil {
+		log.Println(err)
+	}
+	// listen indefinitely for new messages coming
+	// through on our WebSocket connection
+	for {
+		// read in a message
+		messageType, p, err := ws.ReadMessage()
+		if err != nil {
+			log.Println(err)
+		}
+		// print out that message for clarity
+		log.Println(string(p), messageType)
+
+		if err := ws.WriteMessage(1, []byte("ack: " + string(p))); err != nil {
+			log.Println(err)
+		}
+	}
+}
+///
 
 func perfTestBench(w http.ResponseWriter, r *http.Request) {
 	// best performance

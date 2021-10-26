@@ -8,6 +8,7 @@ require (
 	github.com/go-co-op/gocron v1.9.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang/glog v1.0.0 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/jamf/go-mysqldump v0.6.0 // indirect
 	github.com/jasonlvhit/gocron v0.0.1 // indirect
 	github.com/prprprus/scheduler v0.5.0 // indirect

@@ -190,6 +190,32 @@
                 document.getElementById("strencode").value = atob(encode);
         }
 
+        function sendWsMessage() {
+            console.log("try to connect " + document.location.host );
+            let socket = new WebSocket("ws://" + document.location.host + "/webscket");
+
+            socket.onopen = () => {
+                console.log("connected");
+                str1 = document.getElementById("msgsend").value;
+                socket.send( str1 )
+            };
+
+            socket.onclose = event => {
+                console.log("socket closed connection: ", event);
+                socket.send("client closed!")
+            };
+
+            socket.onerror = error => {
+                console.log("socket error: ", error);
+            };
+
+            socket.onmessage = function (event) {
+                server_str = event.data
+                console.log(server_str);
+                document.getElementById("msgrecv").value = server_str;
+            }
+        }
+
     </script>
 
     <style>
@@ -338,15 +364,39 @@
     <div class="collapsible-content">
     <div class="content-inner">
     <div class="items-body">
-			<form>
-                Encode <a href="#" onclick="document.getElementById('strencode').value=''">&nbsp;&nbsp;clear</a>
-                <input id="strencode" type="text" value="Hello World"><br />
+        <form>
+            Encode <a href="#" onclick="document.getElementById('strencode').value=''">&emsp;&emsp;&emsp;&emsp;&emsp;clear</a>
+            <input id="strencode" type="text" value="Hello World"><br />
 
-                Decode <a href="#" onclick="document.getElementById('strdecode').value=''">&nbsp;&nbsp;clear</a>
-                <input id="strdecode" type="text" value=""><br />
+            Decode <a href="#" onclick="document.getElementById('strdecode').value=''">&emsp;&emsp;&emsp;&emsp;&emsp;clear</a>
+            <input id="strdecode" type="text" value=""><br />
 
-				<input type="submit" value="Convert" onclick="stringCodeOps(); return false;" /><br/></p>
-			</form>
+            <input type="submit" value="Convert" onclick="stringCodeOps(); return false;" /><br/></p>
+        </form>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+
+
+
+    <div class="section"><span class="icono-gear"></span>
+    <div class="wrap-collabsible">
+    <input  id="wstest" class="toggle" type="checkbox">
+    <label for="wstest" class="lbl-toggle">WebSocket Test </label>
+    <div class="collapsible-content">
+    <div class="content-inner">
+    <div class="items-body">
+        <form>
+            Send Message <a href="#" onclick="document.getElementById('msgsend').value=''">&emsp;&emsp;clear</a>
+            <input id="msgsend" type="text" value="Hello World"><br />
+
+            Receive Message <a href="#" onclick="document.getElementById('msgrecv').value=''">&emsp;clear</a>
+            <input id="msgrecv" type="text" value=""><br />
+
+            <input type="submit" value="Send" onclick="sendWsMessage(); return false;" /><br/></p>
+        </form>
     </div>
     </div>
     </div>
